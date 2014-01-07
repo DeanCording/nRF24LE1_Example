@@ -6,3 +6,12 @@
 *.rel
 *.rst
 *.sym
+*.asm
+*.d
+*.cdb
+*.hex
+*.ihx
+*.lk
+*.omf
+
+**/.directory
