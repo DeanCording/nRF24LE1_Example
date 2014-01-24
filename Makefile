@@ -12,18 +12,24 @@ TARGETNAME := _target_sdcc_nrf24le1_$(PINS)
 export EXTERNINCDIRS = ../nRF24LE1_SDK/$(TARGETNAME)/include ../nRF24LE1_SDK/include
 export EXTERNLIBDIRS = ../nRF24LE1_SDK/$(TARGETNAME)/lib
 
-# Functions needed by this makefile and the one that builds the source packages (MakefileSrc)
-export ECHO = @echo
-export RM = rm
-export SED = sed
-export MKDIR = mkdir
-export TR = tr
-export BLACKHOLE = /dev/null
-export PWD = pwd
-export CD = cd
-export LS = ls
+# Functions needed by this makefile
+ECHO = @echo
+RM = rm
+SED = sed
+MKDIR = mkdir
+TR = tr
+BLACKHOLE = /dev/null
+PWD = pwd
+CD = cd
+LS = ls
 PACKIHX = packihx
 TAIL = tail
+STTY = stty
+# Configuration of serial port to work with Arduino
+STTYOPTIONS = 10:0:18b1:0:3:1c:7f:15:4:0:0:0:11:13:1a:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0
+TTYPORT = /dev/ttyACM0
+# Location of programmer.pl script to use with the Arduino programmer sketch
+PROGRAMMER = ~/projects/arduino/sketches/nRF24LE1/Programmer/Programmer/Programmer.pl
 
 # Programs to use for creating dependencies, compiling source files, and creating the library file, respectively
 DEP = sdcc
@@ -88,7 +94,9 @@ $(DEPDIR)/%.$(DEPEXT): $(SRCDIR)/%.$(SRCEXT)
 
 .SECONDARY: $(OBJFILES) $(DEPFILES)
 
-link:
+link: $(MAINHEX)
+
+$(MAINHEX): $(OBJFILES) $(DEPFILES)
 	$(ECHO)
 	$(ECHO) "Linking project"
 	$(LK) $(LFLAGS)
@@ -101,6 +109,10 @@ link:
 	$(ECHO) "Memory statistics:"
 	$(TAIL) -n 5 $(FLASHDIR)/main.mem
 
+upload: link
+	$(STTY) -F $(TTYPORT) $(STTYOPTIONS)
+	$(PROGRAMMER) $(MAINHEX) $(TTYPORT)
+	
 .PHONY: clean
 
 clean:

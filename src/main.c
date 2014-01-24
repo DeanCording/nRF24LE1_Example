@@ -19,8 +19,13 @@ void main(){
 			   GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT |
 			   GPIO_PIN_CONFIG_OPTION_OUTPUT_VAL_CLEAR |
 			   GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH);
+	gpio_pin_configure(GPIO_PIN_ID_P0_1,
+			   GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT |
+			   GPIO_PIN_CONFIG_OPTION_OUTPUT_VAL_CLEAR |
+			   GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH);
 
 	gpio_pin_val_sbit_clear(P0_SB_D0);
+	gpio_pin_val_sbit_clear(P0_SB_D1);
 	
 	//Set up RF
 	rf_configure_debug_lite(false, 1); //initialize the rf to the debug configuration as TX, 1 data bytes, and auto-ack disabled
@@ -48,20 +53,22 @@ void main(){
 			//  If neither of these is true, keep looping.
 			if((rf_irq_pin_active() && rf_irq_rx_dr_active())) {
 				rf_read_rx_payload(&datavar, 1); //get the payload into data
-				gpio_pin_val_sbit_complement(P0_SB_D0); //toggle the output pin as an indication that the loop has completed
+				gpio_pin_val_sbit_set(P0_SB_D1);
 
 				break;
 			}
 
 			//if loop is on its last iteration, assume packet has been lost.
 			if(count == 24999)
-				gpio_pin_val_sbit_clear(P0_SB_D0);
+				gpio_pin_val_sbit_clear(P0_SB_D1);
 		}
 
 		rf_irq_clear_all(); //clear interrupts again
 
 		rf_set_as_tx(); //resume normal operation as a TX
-		delay_us(130); //wait for remote unit to come from standby to RX
+		delay_us(1300); //wait for remote unit to come from standby to RX
+		
+		gpio_pin_val_sbit_complement(P0_SB_D0); //toggle the output pin as an indication that the loop has completed
 
 	}
 }
