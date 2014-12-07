@@ -2,7 +2,7 @@
 #
 # Make file for compiling nRF24LE1 applications using SDCC and nRF24LE1_SDK
 
-# Specify the target device pin package. Options are 24, 32, or 48 
+# Specify the target device pin package. Options are 24, 32, or 48
 PINS := 24
 
 TARGETNAME := _target_sdcc_nrf24le1_$(PINS)
@@ -57,7 +57,7 @@ OBJFILES = $(strip $(shell $(LS) $(OBJDIR)/*.rel))
 MAINHEX = $(FLASHDIR)/main.hex
 MAINIHX = $(FLASHDIR)/main.ihx
 
-LIBFILES := $(foreach _dir,$(EXTERNLIBDIRS),$(strip $(shell $(LS) $(_dir))))
+LIBFILES := nrf24le1.lib
 LIBDIRS := $(foreach _dir,$(EXTERNLIBDIRS),-L $(_dir))
 
 INCDIRS = -I$(INCDIR) $(foreach dir,$(strip $(EXTERNINCDIRS)),-I$(dir))
@@ -71,7 +71,7 @@ DEPFILES = $(subst .$(SRCEXT),.$(DEPEXT),$(subst $(SRCDIR),$(DEPDIR),$(SRCFILES)
 all: build link
 
 build: $(OBJFILES)
-	$(if $(FILESMODIFIED),$(ECHO)) 
+	$(if $(FILESMODIFIED),$(ECHO))
 
 $(OBJDIR)/%.$(OBJEXT) : $(SRCDIR)/%.$(SRCEXT) $(DEPDIR)/%.$(DEPEXT)
 	$(ECHO)
@@ -112,7 +112,7 @@ $(MAINHEX): $(OBJFILES) $(DEPFILES)
 upload: link
 	$(STTY) -F $(TTYPORT) $(STTYOPTIONS)
 	$(PROGRAMMER) $(MAINHEX) $(TTYPORT)
-	
+
 .PHONY: clean
 
 clean:
